@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "Cryptick",
+  "description": "Add cryptocurrency price information when you hover over text.",
+  "version": "0.1",
+  "permissions": [
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "cryptick.css"
+      ],
+      "run_at": "document_end"
+    }
+  ]
+}
