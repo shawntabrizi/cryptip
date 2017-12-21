@@ -1,23 +1,31 @@
 {
   "manifest_version": 2,
-  "name": "Cryptick",
-  "description": "Add cryptocurrency price information when you hover over text.",
-  "version": "0.1",
+  "name": "Cryptip",
+  "author": "Shawn Tabrizi",
+  "description": "Add cryptocurrency price information when you hover over token symbols.",
+  "version": "1.0",
   "permissions": [
-    "storage"
+    "storage",
+    "https://api.coinmarketcap.com/"
   ],
   "content_scripts": [
     {
       "matches": [
-        "*://*/*"
+        "<all_urls>"
       ],
       "js": [
+        "./js/browser-polyfill.min.js",
+        "./js/tippy.all.min.js",
         "content.js"
       ],
       "css": [
-        "cryptick.css"
+        "cryptip.css"
       ],
       "run_at": "document_end"
     }
-  ]
+  ],
+  "options_ui": {
+    "page": "options.html"
+  },
+  "homepage_url": "http://shawntabrizi.com/cryptip/"
 }
