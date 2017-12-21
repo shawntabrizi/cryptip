@@ -18,9 +18,6 @@
         "./js/tippy.all.min.js",
         "content.js"
       ],
-      "css": [
-        "cryptip.css"
-      ],
       "run_at": "document_end"
     }
   ],
