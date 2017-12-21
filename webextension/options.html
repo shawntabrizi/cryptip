@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body>
+    <h3>Find bugs? Have suggestions? Wanna say thanks?</h3>
+    <div>
+        <p>I am always looking for feedback, and would be happy to hear about any comments or criticisms. Feel free to open bugs on <a href="https://github.com/shawntabrizi/cryptip">GitHub</a> or send me an <a href="mailto:shawntabrizi@gmail.com?Subject=Cryptip%20Feedback">email.</a></p>
+        <p>If you found this plugin extra useful, feel free to say thanks by sending a small donation here:</p>
+        <ul>
+            <li>ETH: <a href="https://etherscan.io/address/0xD62835Fe2B40C8411A10E7980a290270e6A23cDA"><code>0xD62835Fe2B40C8411A10E7980a290270e6A23cDA</code></a></li>
+            <li>BTC: <a href="https://blockchain.info/address/3QQJLmgMJdWDThvWpbvmrKH9WVJyBM9TZy"><code>3QQJLmgMJdWDThvWpbvmrKH9WVJyBM9TZy</code></a></li>
+        </ul>
+    </div>
+    <h3>Cryptip Options</h3>
+    <form>
+        <label>Token list:</label>
+        <select id="top">
+            <option value="10">Top 10</option>
+            <option value="50">Top 50</option>
+            <option value="100" selected>Top 100</option>
+            <option value="500">Top 500</option>
+            <option value="1000">Top 1000</option>
+            <option value="0">All Tokens</option>
+        </select>
+        <br /><br />
+        <label>Currency shown:</label>
+        <select id="currency">
+            <option value="usd" selected>USD</option>
+            <option value="btc">BTC</option>
+            <option value="aud">AUD</option>
+            <option value="brl">BRL</option>
+            <option value="cad">CAD</option>
+            <option value="chf">CHF</option>
+            <option value="clp">CLP</option>
+            <option value="cny">CNY</option>
+            <option value="czk">CZK</option>
+            <option value="dkk">DKK</option>
+            <option value="eur">EUR</option>
+            <option value="gbp">GBP</option>
+            <option value="hkd">HKD</option>
+            <option value="huf">HUF</option>
+            <option value="idr">IDR</option>
+            <option value="ils">ILS</option>
+            <option value="inr">INR</option>
+            <option value="jpy">JPY</option>
+            <option value="krw">KRW</option>
+            <option value="mxn">MXN</option>
+            <option value="myr">MYR</option>
+            <option value="nok">NOK</option>
+            <option value="nzd">NZD</option>
+            <option value="php">PHP</option>
+            <option value="pkr">PKR</option>
+            <option value="pln">PLN</option>
+            <option value="rub">RUB</option>
+            <option value="sek">SEK</option>
+            <option value="sgd">SGD</option>
+            <option value="thb">THB</option>
+            <option value="try">TRY</option>
+            <option value="twd">TWD</option>
+            <option value="zar">ZAR</option>
+        </select>
+        <br /><br />
+        <label>Percent change in the last:</label>
+        <select id="period">
+            <option value="1h">1 Hour</option>
+            <option value="24h" selected>24 Hours</option>
+            <option value="7d">7 Days</option>
+        </select>
+        <br /><br />
+        <button type="submit">Save</button><button type="reset">Reset</button>
+
+        <div id="output"></div>
+    </form>
+    <script src=".\js\browser-polyfill.min.js"></script>
+    <script src="options.js"></script>
+</body>
+
+</html>
