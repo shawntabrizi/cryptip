@@ -101,24 +101,26 @@ function createPriceString(coindict, sym, currency, time) {
 
 function addTooltip(coinmarketcap, currency = 'usd', time = '24h', checkNames = false, ignoreCase = false) {
     try {
-        var symdict = {}
-        var syms = []
-
-        var namedict = {}
-        var names = []
+        var coindict = {}
+        var coins = []
 
         for (coin in coinmarketcap) {
             var sym = coinmarketcap[coin]['symbol'].toUpperCase();
             var name = coinmarketcap[coin]['name'].toUpperCase();
 
-            if (!(sym in symdict)) {
-                symdict[sym] = coinmarketcap[coin]
-                syms.push((escapeRegExp(sym)))
-            }
+            //Remove meta information in the name surrounded by () or []
+            name = name.replace(/ \[.*?\]/g, '');
+            name = name.replace(/ \(.*?\)/g, '');
 
-            if (!(name in namedict)) {
-                namedict[name] = coinmarketcap[coin]
-                names.push(escapeRegExp(name))
+            if (!(sym in coindict)) {
+                coindict[sym] = coinmarketcap[coin]
+                coins.push((escapeRegExp(sym)))
+            }
+            if (checkNames) {
+                if (!(name in coindict)) {
+                    coindict[name] = coinmarketcap[coin]
+                    coins.push(escapeRegExp(name))
+                }
             }
         }
 
@@ -128,15 +130,14 @@ function addTooltip(coinmarketcap, currency = 'usd', time = '24h', checkNames = 
             regSettings = 'g'
         }
 
-        var symsreg = syms.join('|')
-        var reSyms = new RegExp('\\b((' + symsreg + '))\\b', regSettings)
-
         //sort by name length so things like "bitcoin cash" aren't accentially marked as bitcoin
-        names.sort(function (a, b) {
+        coins.sort(function (a, b) {
             return b.length - a.length;
         });
-        var namesreg = names.join('|')
-        var reNames = new RegExp('\\b((' + namesreg + '))\\b', regSettings)
+
+        var coinsreg = coins.join('|')
+        var reCoins = new RegExp('\\b((' + coinsreg + '))\\b', regSettings)
+
 
         var elements = document.body.getElementsByTagName('*');
 
@@ -155,26 +156,13 @@ function addTooltip(coinmarketcap, currency = 'usd', time = '24h', checkNames = 
                         var text = node.nodeValue;
                         var change = false;
 
-                        if (reSyms.test(text)) {
-                            text = text.replace(reSyms, function (a, b) {
-                                console.info('Adding cryptip to:' + b, element.tagName)
-                                let priceString = createPriceString(symdict, b, currency, time);
+                        if (reCoins.test(text)) {
+                            text = text.replace(reCoins, function (a, b) {
+                                //console.info('Adding cryptip to:' + b, element.tagName)
+                                let priceString = createPriceString(coindict, b, currency, time);
                                 return `<span class="cryptip" title="${priceString}">${b}</span>`;
                             });
                             change = true;
-
-                        }
-
-                        if (checkNames) {
-                            if (reNames.test(text)) {
-                                text = text.replace(reNames, function (a, b) {
-                                    console.info('Adding cryptip to:' + b, element.tagName)
-                                    //name is always case independent
-                                    let priceString = createPriceString(namedict, b, currency, time);
-                                    return `<span class="cryptip" title="${priceString}">${b}</span>`;
-                                });
-                                change = true;
-                            }
                         }
 
                         if (change) {
