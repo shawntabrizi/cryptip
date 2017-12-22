@@ -171,7 +171,7 @@ async function cryptipEmbedded() {
     }
 }
 
-if (window.browser) {
+if (this.browser) {
     cryptip();
 } else {
     console.log('Cryptip: Detected embedded plugin.')
