@@ -2,7 +2,11 @@
   "manifest_version": 2,
   "name": "Cryptip",
   "author": "Shawn Tabrizi",
-  "description": "Add cryptocurrency price information when you hover over token symbols.",
+  "description": "Get cryptocurrency price information everywhere.",
+  "icons": {
+    "48": "icons/icon_48.png",
+    "96": "icons/icon_96.png"
+  },
   "version": "1.0",
   "permissions": [
     "storage",
