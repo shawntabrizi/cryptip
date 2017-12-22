@@ -29,6 +29,7 @@ You will see the following configuration options:
 
       [true, false]
 
+![Configuration Menu Image](./logo/meta-images/cryptip5.jpg)
 
 ### Found a bug? Have a suggestion? Want to say thanks?
 I am always happy to receive any comments and criticisms about Cryptip. If you found an issue, or have an idea for ways to improve Cryptip, you can open an issue on GitHub or email me directly.
