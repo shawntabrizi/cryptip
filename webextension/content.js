@@ -115,9 +115,12 @@ function addTooltip(coinmarketcap, currency = 'usd', time = '24h') {
 
     elements = [].slice.call(elements, 0)
 
+    var skipTags = ['script','style']
+
     for (var i = 0; i < elements.length; i++) {
         var element = elements[i];
-        if (element.tagName.toLocaleLowerCase() != 'script') {
+        //check that the tag is not in the skipTags array
+        if (skipTags.indexOf(element.tagName.toLocaleLowerCase()) === -1) {
             for (var j = element.childNodes.length - 1; j >= 0; j--) {
                 var node = element.childNodes[j];
 
@@ -127,7 +130,7 @@ function addTooltip(coinmarketcap, currency = 'usd', time = '24h') {
                     if (re.test(text)) {
                         var replacementNode = document.createElement('span');
                         replacementNode.innerHTML = text.replace(re, function (a, b) {
-                            //console.info('Adding cryptip to:' + b)
+                            console.info('Adding cryptip to:' + b, element.tagName)
                             let priceString = createPriceString(coindict, b, currency, time);
                             return `<span class="cryptip" title="${priceString}">${b}</span>`;
                         });
@@ -152,4 +155,25 @@ async function cryptip() {
     }
 }
 
-cryptip();
+async function cryptipEmbedded() {
+    try {
+        let data = {
+            'currency': 'usd',
+            'top': '100',
+            'period': '24h'
+        }
+        let coins = await getPrice(data.top, data.currency);
+
+        addTooltip(coins, data.currency, data.period);
+        tippy('.cryptip');
+    } catch (error) {
+        console.error("Cryptip Error: " + error)
+    }
+}
+
+if (window.browser) {
+    cryptip();
+} else {
+    console.log('Cryptip: Detected embedded plugin.')
+    cryptipEmbedded();
+}

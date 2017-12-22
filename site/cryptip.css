@@ -1,0 +1,61 @@
+html,
+body {
+    background: url('./img/background_2.png') repeat, url('./img/background_1.png') no-repeat, linear-gradient(to left, #442222, #664466);
+}
+
+.test-area {
+    background-color: rgba(0,0,0,.25);
+    padding: 1em;
+}
+
+
+
+.nav-masthead {
+    float: right;
+}
+
+.masthead-brand {
+    float: left;
+    padding-left: 100px;
+    font-size: 3em;
+}
+
+.browser-image {
+    width: 2em;
+    margin-left: .5em;
+    margin-top: -1em;
+    margin-bottom: -.75em;
+    margin-right: -.5em;
+}
+.browser-btn {
+    width: 12em;
+}
+
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0; 
+    opacity: .5
+}
+
+
+@media (max-width: 48em) {
+    .cover {
+        margin-top: 120px;
+    }
+    .mastfoot {
+        position: initial;
+    }
+}
+
+@media (min-width: 62em) {
+    .masthead,
+    .mastfoot,
+    .cover-container {
+        width: 60rem;
+    }
+
+}
