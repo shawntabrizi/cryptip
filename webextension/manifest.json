@@ -12,6 +12,10 @@
     "storage",
     "https://api.coinmarketcap.com/"
   ],
+  "browser_action": {
+    "default_icon": "icons/icon_48.png",
+    "default_popup": "options.html"
+  },
   "content_scripts": [
     {
       "matches": [
@@ -21,6 +25,9 @@
         "./js/browser-polyfill.min.js",
         "./js/tippy.all.min.js",
         "content.js"
+      ],
+      "css": [
+        "cryptip.css"
       ],
       "run_at": "document_end"
     }
