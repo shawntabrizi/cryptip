@@ -1,3 +1,6 @@
+var global = {
+}
+
 async function getPrice(top, currency) {
     try {
         let response = await fetch("https://api.coinmarketcap.com/v1/ticker/?limit=" + top + "&convert=" + currency);
@@ -13,7 +16,8 @@ function filterCoinName(name) {
     //Remove meta information in the name surrounded by () or []
     name = name.replace(/ \[.*?\]/g, '');
     name = name.replace(/ \(.*?\)/g, '');
-
+    //Remove spaces from the front and back
+    name = name.trim();
     return name;
 }
 
@@ -30,6 +34,7 @@ function createCoinDictionary(coinMarketCapData, checkNames = true) {
 
         coinDictionary[coinSymbol].push(coinMarketCapData[coin]);
 
+        //only run this if the user also wants to add cryptip to coin names
         if (checkNames) {
             var coinName = coinMarketCapData[coin]['name'].toUpperCase();
 
@@ -52,13 +57,13 @@ function createCoinDictionary(coinMarketCapData, checkNames = true) {
 async function storePrice(top = 100, currency = 'usd') {
     try {
         var coinMarketCapData = await getPrice(top, currency);
-        var coinDictionary = createCoinDictionary(coinMarketCapData);
+        global.coinDictionary = createCoinDictionary(coinMarketCapData);
         var time = (new Date()).getTime();
 
         console.log('Cryptip: Storing new CoinMarketCap data at ' + (new Date(time).toString()));
 
-        return browser.storage.local.set({
-            'coinDictionary': JSON.stringify(coinDictionary),
+        return await browser.storage.local.set({
+            'coinDictionary': JSON.stringify(global.coinDictionary),
             'time': time
         });
 
@@ -70,36 +75,44 @@ async function storePrice(top = 100, currency = 'usd') {
 
 async function checkStorage() {
     try {
+        //Get whatever is in the local storage
         var storage = await browser.storage.local.get();
 
+        //check time
         if (storage.time) {
             let currentTime = (new Date()).getTime();
             let timeDiff = currentTime - storage.time;
             let min = ((timeDiff / 1000) / 60);
 
+            //if more than a minute, then get new price information
             if (min > 1) {
                 console.log('Cryptip: Over 1 minute has passed, getting new price data.');
                 await storePrice(storage.top, storage.currency);
             } else {
+                global.coinDictionary = JSON.parse(storage.coinDictionary)
                 console.log('Cryptip: No need to get new data for another ' + Math.round(60 * (1 - min)) + ' seconds.');
             }
-
+            //if no time information, get data for the first time
         } else {
             console.log('Getting price data for the first time.');
             await storePrice(storage.top, storage.currency);
         }
+
     } catch (error) {
         console.error("Cryptip Error: " + error);
     }
 }
 
+//convert symbols which affect regular expressions into regular expression safe symbols
 function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
-function createPriceString(coindict, sym, currency, time) {
+function createPriceString(sym, currency = 'usd', time= '24h') {
     try {
+        var coinDictionary = global.coinDictionary
         sym = sym.toUpperCase()
+
         var priceString = "";
         var afterString = currency.toUpperCase() + " ";
         //add currency symbol
@@ -114,7 +127,7 @@ function createPriceString(coindict, sym, currency, time) {
         }
 
         //adjust for relative size of price
-        var price = parseFloat(coindict[sym][('price_' + currency)])
+        var price = parseFloat(coinDictionary[sym][0][('price_' + currency)])
         if (price > 1000) {
             price = price.toLocaleString(undefined, { maximumFractionDigits: 0, minimumFractionDigits: 0 })
         } else if (price > 1) {
@@ -127,11 +140,11 @@ function createPriceString(coindict, sym, currency, time) {
 
         //add percent change
         priceString += "("
-        if (coindict[sym][('percent_change_' + time)] > 0) {
+        if (coinDictionary[sym][0][('percent_change_' + time)] > 0) {
             //add plus sign if positive
             priceString += "+"
         }
-        priceString += coindict[sym][('percent_change_' + time)] + "%)"
+        priceString += coinDictionary[sym][0][('percent_change_' + time)] + "%)"
 
         return priceString
     } catch (error) {
@@ -139,89 +152,85 @@ function createPriceString(coindict, sym, currency, time) {
     }
 }
 
-function addTooltip(coinmarketcap, currency = 'usd', time = '24h', checkNames = false, ignoreCase = false) {
+function createRegularExpression(coinDictionary, ignoreCase = true) {
+    var coins = Object.keys(coinDictionary)
+
+    //sort by name length so things like "bitcoin cash" aren't accentially marked as bitcoin
+    coins.sort(function (a, b) {
+        return b.length - a.length;
+    });
+
+    //fix any problems in the string that may affect the regular expression
+    coins = coins.map(escapeRegExp)
+
+    var reSettings = ignoreCase ? 'gi' : 'g'
+
+
+    var coinsreg = coins.join('|')
+    var reCoins = new RegExp('\\b((' + coinsreg + '))\\b', reSettings)
+
+    return reCoins
+}
+
+function checkPageElementsForCoins(elements, regularExpression, callback) {
     try {
-        var coindict = {}
-        var coins = []
-
-        for (coin in coinmarketcap) {
-            var sym = coinmarketcap[coin]['symbol'].toUpperCase();
-            var name = coinmarketcap[coin]['name'].toUpperCase();
-
-            //Remove meta information in the name surrounded by () or []
-            name = name.replace(/ \[.*?\]/g, '');
-            name = name.replace(/ \(.*?\)/g, '');
-
-            if (!(sym in coindict)) {
-                coindict[sym] = coinmarketcap[coin]
-                coins.push((escapeRegExp(sym)))
-            }
-
-            if (checkNames) {
-                if (!(name in coindict)) {
-                    coindict[name] = coinmarketcap[coin]
-                    coins.push(escapeRegExp(name))
-                }
-            }
-        }
-
-        console.log(coins)
-
-        if (ignoreCase) {
-            regSettings = 'gi'
-        } else {
-            regSettings = 'g'
-        }
-
-        //sort by name length so things like "bitcoin cash" aren't accentially marked as bitcoin
-        coins.sort(function (a, b) {
-            return b.length - a.length;
-        });
-
-        var coinsreg = coins.join('|')
-        var reCoins = new RegExp('\\b((' + coinsreg + '))\\b', regSettings)
-
-
-        var elements = document.body.getElementsByTagName('*');
-
-        elements = [].slice.call(elements, 0)
+        var elementsCopy = Array.prototype.slice.call(elements, 0)
 
         var skipTags = ['script', 'style', 'input', 'noscript', 'code']
 
-        for (var i = 0; i < elements.length; i++) {
-            var element = elements[i];
+        for (var i = 0; i < elementsCopy.length; i++) {
+            var element = elementsCopy[i];
             //check that the tag is not in the skipTags array
             if (skipTags.indexOf(element.tagName.toLowerCase()) === -1) {
                 for (var j = element.childNodes.length - 1; j >= 0; j--) {
                     var node = element.childNodes[j];
-
                     if (node.nodeType === 3) {
-                        var text = node.nodeValue;
-
-                        if (reCoins.test(text)) {
-                            text = text.replace(reCoins, function (a, b) {
-                                console.info('Adding cryptip to:' + b, element.tagName)
-                                let priceString = createPriceString(coindict, b, currency, time);
-                                var advanceTooltip = document.createElement('div')
-                                advanceTooltip.id = 'cryptip-' + b;
-                                advanceTooltip.style.display = 'none';
-                                advanceTooltip.innerHTML = `<p>Symbol: ${b}</p><p>Price: ${priceString}</p>`
-                                document.body.appendChild(advanceTooltip);
-                                console.log(advanceTooltip)
-                                return `<cryptip class="cryptip">${b}</cryptip>`;
-                            });
-                            if (!document.querySelector('#'))
-                            var replacementNode = document.createElement('cryptip-container');
-                            replacementNode.innerHTML = text;
-                            node.parentNode.insertBefore(replacementNode, node);
-                            node.parentNode.removeChild(node)
-
+                        if (regularExpression.test(node.nodeValue)) {
+                            if (typeof callback == "function") {
+                                callback(node, regularExpression)
+                            } else {
+                                console.error("Not a callback function.")
+                            }
                         }
 
                     }
                 }
             }
         }
+    } catch (error) {
+        console.error("Cryptip Error: " + error)
+    }
+}
+
+function addCryptipToText(node, regularExpression) {
+    try {
+        var text = node.nodeValue;
+
+        text = text.replace(regularExpression, function (fullText, match) {
+            console.info('Adding cryptip to:' + match, node.parentNode.tagName)
+            let priceString = createPriceString(match);
+            return `<cryptip class="cryptip" title="${priceString}">${match}</cryptip>`;
+        });
+
+        var replacementNode = document.createElement('cryptip-container');
+        replacementNode.innerHTML = text;
+        node.parentNode.insertBefore(replacementNode, node);
+        node.parentNode.removeChild(node)
+    } catch (error) {
+        console.error("Cryptip Error: " + error)
+    }
+}
+
+function addTooltip(currency = 'usd', time = '24h', checkNames = true, ignoreCase = true) {
+    try {
+        var coinDictionary = global.coinDictionary;
+
+        var regularExpressionCoins = createRegularExpression(coinDictionary, ignoreCase)
+
+        var elements = document.body.getElementsByTagName('*');
+
+        checkPageElementsForCoins(elements, regularExpressionCoins, addCryptipToText)
+
     } catch (error) {
         console.error("Cryptip Error: " + error)
     }
@@ -256,22 +265,12 @@ async function addTooltipAdvance(element) {
 async function cryptip() {
     try {
         await checkStorage();
-        let storage = await browser.storage.local.get();
-        let coinDictionary = JSON.parse(storage.coinDictionary);
-        console.log(coinDictionary)
-        //addTooltip(coins, storage.currency, storage.period, storage.checkNames, storage.ignoreCase);
+        if (global.coinDictionary) {
+            addTooltip();
+        }
 
 
-        const tip = tippy('.cryptip',
-            {
-                animation: 'shift-toward',
-                arrow: true,
-                html: function (el) {
-                    var element = document.querySelector("#cryptip-" + el.innerText)
-                    console.log(element)
-                    return element;
-                }
-            });
+        const tip = tippy('.cryptip');
 
 
     } catch (error) {
