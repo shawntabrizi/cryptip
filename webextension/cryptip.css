@@ -1,3 +1,27 @@
-.cryptip {
-    all: unset;
+.cryptip-container {
+    width: 12em;
+}
+.cryptip-image {
+    width: 4em;
+    float: left;
+}
+.cryptip-main {
+    width: 8em;
+    float: left;
+}
+.cryptip-title {
+    width: 8em;
+    float: left;
+}
+.cryptip-price {
+    width: 8em;
+    float: left;
+}
+.cryptip-rank {
+    width: 4em;
+    float: left;
+}
+.cryptip-market {
+    width: 4em;
+    float: left;
 }

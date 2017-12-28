@@ -202,6 +202,32 @@ function checkPageElementsForCoins(elements, regularExpression, callback) {
     }
 }
 
+function createWidget(sym) {
+    if (!(document.getElementById('template-' + sym.toLowerCase()))) {
+        sym = sym.toUpperCase();
+        var coin = global.coinDictionary[sym][0]
+
+        var template = document.createElement('div');
+
+
+        template.id = 'template-' + sym.toLowerCase();
+        template.style.display = 'none';
+
+        template.innerHTML = `
+                                <div class="cryptip-container">
+                                    <div class="cryptip-image"><img src="https://files.coinmarketcap.com/static/img/coins/32x32/${coin.id}.png"></div>
+                                    <div class="cryptip-main">
+                                        <div class="cryptip-title">${coin.name} (${coin.symbol})</div>
+                                        <div class="cryptip-price">${coin.price_usd} (${coin.percent_change_24h})</div>
+                                    </div>
+                                    <div class="cryptip-rank"><p>RANK</p><p>${coin.rank}</p></div>
+                                    <div class="cryptip-market"><p>MARKET CAP</p><p>${coin.market_cap_usd}</p></div>
+                                </div>
+                                `
+        document.body.appendChild(template);
+    }
+}
+
 function addCryptipToText(node, regularExpression) {
     try {
         var text = node.nodeValue;
@@ -209,13 +235,16 @@ function addCryptipToText(node, regularExpression) {
         text = text.replace(regularExpression, function (fullText, match) {
             console.info('Adding cryptip to:' + match, node.parentNode.tagName)
             let priceString = createPriceString(match);
-            return `<cryptip class="cryptip" title="${priceString}">${match}</cryptip>`;
+            createWidget(match)
+            return `<cryptip class="cryptip" >${match}</cryptip>`;
         });
 
-        var replacementNode = document.createElement('cryptip-container');
+        var replacementNode = document.createElement('cryptip-wrapper');
         replacementNode.innerHTML = text;
         node.parentNode.insertBefore(replacementNode, node);
         node.parentNode.removeChild(node)
+
+
     } catch (error) {
         console.error("Cryptip Error: " + error)
     }
@@ -223,6 +252,7 @@ function addCryptipToText(node, regularExpression) {
 
 function addTooltip(currency = 'usd', time = '24h', checkNames = true, ignoreCase = true) {
     try {
+
         var coinDictionary = global.coinDictionary;
 
         var regularExpressionCoins = createRegularExpression(coinDictionary, ignoreCase)
@@ -264,13 +294,25 @@ async function addTooltipAdvance(element) {
 
 async function cryptip() {
     try {
+
+
+
+
         await checkStorage();
         if (global.coinDictionary) {
             addTooltip();
         }
 
+        //const template1 = document.querySelector('#template')
+        //const clonedTemplate = template1.cloneNode(true)
 
-        const tip = tippy('.cryptip');
+        //const initialText = template.textContent
+
+        const tip = tippy('.cryptip', {
+            html: function (element) {
+                return '#template-' + element.innerText.toLowerCase()
+            }
+        });
 
 
     } catch (error) {
