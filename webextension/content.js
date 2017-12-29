@@ -1,5 +1,4 @@
-var global = {
-}
+var global = {}
 
 async function getPrice(top, currency) {
     try {
@@ -108,7 +107,7 @@ function escapeRegExp(str) {
     return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
 }
 
-function createPriceString(sym, currency = 'usd', time= '24h') {
+function createPriceString(sym, currency = 'usd', time = '24h') {
     try {
         var coinDictionary = global.coinDictionary
         sym = sym.toUpperCase()
@@ -172,6 +171,10 @@ function createRegularExpression(coinDictionary, ignoreCase = true) {
     return reCoins
 }
 
+function htmlEntities(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 function checkPageElementsForCoins(elements, regularExpression, callback) {
     try {
         var elementsCopy = Array.prototype.slice.call(elements, 0)
@@ -186,11 +189,13 @@ function checkPageElementsForCoins(elements, regularExpression, callback) {
                     var node = element.childNodes[j];
                     if (node.nodeType === 3) {
                         if (regularExpression.test(node.nodeValue)) {
+
                             if (typeof callback == "function") {
                                 callback(node, regularExpression)
                             } else {
                                 console.error("Not a callback function.")
                             }
+
                         }
 
                     }
@@ -202,47 +207,87 @@ function checkPageElementsForCoins(elements, regularExpression, callback) {
     }
 }
 
-function createWidget(sym) {
-    if (!(document.getElementById('template-' + sym.toLowerCase()))) {
-        sym = sym.toUpperCase();
-        var coin = global.coinDictionary[sym][0]
+function marketCapString(value) {
+    value = parseFloat(value)
 
-        var template = document.createElement('div');
+    if (value >= 1e12) {
+        return (value / 1e12).toFixed(2) + "T"
+    } else if (value >= 1e9) {
+        return (value / 1e9).toFixed(2) + "B"
+    } else if (value >= 1e6) {
+        return (value / 1e6).toFixed(2) + "M"
+    } else if (value >= 1e3) {
+        return (value / 1e3).toFixed(2) + "K"
+    } else {
+        return value.toFixed(2)
+    }
+}
+
+function createWidget(sym, priceString) {
+    try {
+        if (!(document.getElementById('template-' + sym.toLowerCase()))) {
+            sym = sym.toUpperCase();
+            var coin = global.coinDictionary[sym][0]
+
+            var template = document.createElement('div');
 
 
-        template.id = 'template-' + sym.toLowerCase();
-        template.style.display = 'none';
-
-        template.innerHTML = `
+            template.id = 'template-' + sym.replace(/\s+/g, '-').toLowerCase();
+            template.style.display = 'none';
+            template.innerHTML = `
                                 <div class="cryptip-container">
-                                    <div class="cryptip-image"><img src="https://files.coinmarketcap.com/static/img/coins/32x32/${coin.id}.png"></div>
-                                    <div class="cryptip-main">
-                                        <div class="cryptip-title">${coin.name} (${coin.symbol})</div>
-                                        <div class="cryptip-price">${coin.price_usd} (${coin.percent_change_24h})</div>
+                                    <div class="cryptip-row">
+                                        <div class="cryptip-image cryptip-col-4"><img class="cryptip-img-responsive" src="https://files.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png"></div>
+                                        <div class="cryptip-main cryptip-col-8">
+
+                                                <div class="cryptip-title"><a class="cryptip-link" href="https://coinmarketcap.com/currencies/${coin.id}/?utm_source=cryptip">${coin.name} (${coin.symbol})</a></div>
+                                                <div class="cryptip-price">${priceString}</div>
+                                                <div class="cryptip-btc">${coin.price_btc} BTC</div>
+
+                                        </div>
                                     </div>
-                                    <div class="cryptip-rank"><p>RANK</p><p>${coin.rank}</p></div>
-                                    <div class="cryptip-market"><p>MARKET CAP</p><p>${coin.market_cap_usd}</p></div>
+                                    <div class="cryptip-row">
+                                        <div class="cryptip-rank cryptip-col-4">
+                                            <div class="cryptip-subtitle">RANK</div>
+                                            <div class="cryptip-subvalue">${coin.rank}</div>
+                                        </div>
+                                        <div class="cryptip-rank cryptip-col-4">
+                                            <div class="cryptip-subtitle">MARKET CAP</div>
+                                            <div class="cryptip-subvalue">${marketCapString(coin.market_cap_usd)}</div>
+                                        </div>
+                                        <div class="cryptip-rank cryptip-col-4">
+                                            <div class="cryptip-subtitle">24H VOLUME</div>
+                                            <div class="cryptip-subvalue">${marketCapString(coin['24h_volume_usd'])}</div>
+                                        </div>
+                                    </div>
                                 </div>
                                 `
-        document.body.appendChild(template);
+            document.body.appendChild(template);
+        } else {
+            //console.log("Already made a cryptip for this: " + sym)
+        }
+
+    } catch (error) {
+        console.error("Cryptip Error: " + error)
     }
 }
 
 function addCryptipToText(node, regularExpression) {
     try {
         var text = node.nodeValue;
+        //text might have HTML elements, so we convert them to text html elements
+        text = htmlEntities(text)
 
         text = text.replace(regularExpression, function (fullText, match) {
             console.info('Adding cryptip to:' + match, node.parentNode.tagName)
             let priceString = createPriceString(match);
-            createWidget(match)
-            return `<cryptip class="cryptip" >${match}</cryptip>`;
+            createWidget(match, priceString)
+            return `<cryptip class="cryptip" data-tippy-interactive="true">${match}</cryptip>`;
         });
 
         var replacementNode = document.createElement('cryptip-wrapper');
         replacementNode.innerHTML = text;
-        node.parentNode.insertBefore(replacementNode, node);
-        node.parentNode.removeChild(node)
+        node.parentNode.replaceChild(replacementNode, node);
 
 
     } catch (error) {
@@ -295,22 +340,16 @@ async function addTooltipAdvance(element) {
 async function cryptip() {
     try {
 
-
-
-
         await checkStorage();
         if (global.coinDictionary) {
             addTooltip();
         }
 
-        //const template1 = document.querySelector('#template')
-        //const clonedTemplate = template1.cloneNode(true)
-
-        //const initialText = template.textContent
-
         const tip = tippy('.cryptip', {
             html: function (element) {
-                return '#template-' + element.innerText.toLowerCase()
+                var template = '#template-' + element.innerHTML.replace(/\s+/g, '-').toLowerCase();
+                //console.log(template)
+                return template
             }
         });
 

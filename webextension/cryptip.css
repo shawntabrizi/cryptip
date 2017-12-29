@@ -1,27 +1,101 @@
+[class*="cryptip-"] {
+    box-sizing: border-box;
+}
+
+.cryptip-row::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+[class*="cryptip-col-"] {
+    float: left;
+    padding: 15px;
+}
+
+.cryptip-col-1 {
+    width: 8.33%;
+}
+
+.cryptip-col-2 {
+    width: 16.66%;
+}
+
+.cryptip-col-3 {
+    width: 25%;
+}
+
+.cryptip-col-4 {
+    width: 33.33%;
+}
+
+.cryptip-col-5 {
+    width: 41.66%;
+}
+
+.cryptip-col-6 {
+    width: 50%;
+}
+
+.cryptip-col-7 {
+    width: 58.33%;
+}
+
+.cryptip-col-8 {
+    width: 66.66%;
+}
+
+.cryptip-col-9 {
+    width: 75%;
+}
+
+.cryptip-col-10 {
+    width: 83.33%;
+}
+
+.cryptip-col-11 {
+    width: 91.66%;
+}
+
+.cryptip-col-12 {
+    width: 100%;
+}
+
 .cryptip-container {
-    width: 12em;
+    width: 25em;
 }
-.cryptip-image {
-    width: 4em;
-    float: left;
-}
+
 .cryptip-main {
-    width: 8em;
-    float: left;
+    text-align:left;
 }
+
 .cryptip-title {
-    width: 8em;
-    float: left;
+    font-size:2em;
+
 }
+
+.cryptip-img-responsive {
+    width:100%;
+}
+
+a.cryptip-link:link,
+a.cryptip-link:visited {
+    color:#ffffff;
+}
+
+
 .cryptip-price {
-    width: 8em;
-    float: left;
+    font-size: 1.25em;
 }
-.cryptip-rank {
-    width: 4em;
-    float: left;
+
+.cryptip-btc {
+    color:#808080;
 }
-.cryptip-market {
-    width: 4em;
-    float: left;
+
+.cryptip-subtitle {
+    font-size: .75em;
+}
+
+.cryptip-subvalue {
+    font-size: 1.5em;
 }
