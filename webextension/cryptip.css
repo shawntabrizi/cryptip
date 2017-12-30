@@ -62,7 +62,7 @@
 }
 
 .cryptip-container {
-    width: 25em;
+    width: 250px;
 }
 
 .cryptip-main {
@@ -70,7 +70,7 @@
 }
 
 .cryptip-title {
-    font-size:2em;
+    font-size:15px;
 
 }
 
@@ -85,17 +85,22 @@ a.cryptip-link:visited {
 
 
 .cryptip-price {
-    font-size: 1.25em;
+    font-size: 12px;
 }
 
 .cryptip-btc {
     color:#808080;
+    font-size: 10px;
 }
 
 .cryptip-subtitle {
-    font-size: .75em;
+    font-size: 8px;
 }
 
 .cryptip-subvalue {
-    font-size: 1.5em;
+    font-size: 12px;
+}
+
+.cryptip-footer {
+    font-size: 6px;
 }

@@ -53,7 +53,7 @@ function createCoinDictionary(coinMarketCapData, checkNames = true) {
     return coinDictionary;
 }
 
-async function storePrice(top = 100, currency = 'usd') {
+async function storePrice(top = 0, currency = 'usd') {
     try {
         var coinMarketCapData = await getPrice(top, currency);
         global.coinDictionary = createCoinDictionary(coinMarketCapData);
@@ -223,22 +223,28 @@ function marketCapString(value) {
     }
 }
 
+function symbolToId(symbol) {
+    return symbol.replace(/[\W_]/g, '-')
+}
+
 function createWidget(sym, priceString) {
     try {
-        if (!(document.getElementById('template-' + sym.toLowerCase()))) {
+        if (!(document.getElementById('template-' + sym.replace(/[\W_]/g, '-').toLowerCase()))) {
             sym = sym.toUpperCase();
-            var coin = global.coinDictionary[sym][0]
+            var coins = global.coinDictionary[sym]
 
-            var template = document.createElement('div');
-
-
-            template.id = 'template-' + sym.replace(/\s+/g, '-').toLowerCase();
-            template.style.display = 'none';
-            template.innerHTML = `
+            for (c in coins) {
+                var coin = coins[c]
+                var template = document.createElement('div');
+                
+                template.id = 'template-' + sym.replace(/[\W_]/g, '-').toLowerCase() + (c > 0 ? c : '');
+                console.log(template.id)
+                template.style.display = 'none';
+                template.innerHTML = `
                                 <div class="cryptip-container">
                                     <div class="cryptip-row">
-                                        <div class="cryptip-image cryptip-col-4"><img class="cryptip-img-responsive" src="https://files.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png"></div>
-                                        <div class="cryptip-main cryptip-col-8">
+                                        <div class="cryptip-image cryptip-col-3"><img class="cryptip-img-responsive" src="https://files.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png"></div>
+                                        <div class="cryptip-main cryptip-col-9">
 
                                                 <div class="cryptip-title"><a class="cryptip-link" href="https://coinmarketcap.com/currencies/${coin.id}/?utm_source=cryptip">${coin.name} (${coin.symbol})</a></div>
                                                 <div class="cryptip-price">${priceString}</div>
@@ -262,7 +268,8 @@ function createWidget(sym, priceString) {
                                     </div>
                                 </div>
                                 `
-            document.body.appendChild(template);
+                document.body.appendChild(template);
+            }
         } else {
             //console.log("Already made a cryptip for this: " + sym)
         }
@@ -347,7 +354,8 @@ async function cryptip() {
 
         const tip = tippy('.cryptip', {
             html: function (element) {
-                var template = '#template-' + element.innerHTML.replace(/\s+/g, '-').toLowerCase();
+                var sym = element.innerHTML
+                var template = '#template-' + element.innerHTML.replace(/[\W_]/g, '-').toLowerCase();
                 //console.log(template)
                 return template
             }
