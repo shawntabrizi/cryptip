@@ -22,6 +22,7 @@
         "<all_urls>"
       ],
       "js": [
+        "./js/findAndReplaceDOMText.js",
         "./js/browser-polyfill.min.js",
         "./js/tippy.all.min.js",
         "content.js"

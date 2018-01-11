@@ -62,20 +62,17 @@
 }
 
 .cryptip-container {
-    width: 250px;
-}
-
-.cryptip-main {
-    text-align:left;
+    min-width: 250px;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .cryptip-title {
-    font-size:15px;
+    font-size:16px;
 
 }
 
 .cryptip-img-responsive {
-    width:100%;
+    vertical-align: middle;
 }
 
 a.cryptip-link:link,
@@ -85,12 +82,12 @@ a.cryptip-link:visited {
 
 
 .cryptip-price {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .cryptip-btc {
     color:#808080;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .cryptip-subtitle {
@@ -98,7 +95,7 @@ a.cryptip-link:visited {
 }
 
 .cryptip-subvalue {
-    font-size: 12px;
+    font-size: 14px;
 }
 
 .cryptip-footer {

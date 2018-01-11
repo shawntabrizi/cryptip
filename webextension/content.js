@@ -166,45 +166,13 @@ function createRegularExpression(coinDictionary, ignoreCase = true) {
 
 
     var coinsreg = coins.join('|')
-    var reCoins = new RegExp('\\b((' + coinsreg + '))\\b', reSettings)
+    var reCoins = new RegExp('\\b(' + coinsreg + ')\\b', reSettings)
 
     return reCoins
 }
 
 function htmlEntities(str) {
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-function checkPageElementsForCoins(elements, regularExpression, callback) {
-    try {
-        var elementsCopy = Array.prototype.slice.call(elements, 0)
-
-        var skipTags = ['script', 'style', 'input', 'noscript', 'code']
-
-        for (var i = 0; i < elementsCopy.length; i++) {
-            var element = elementsCopy[i];
-            //check that the tag is not in the skipTags array
-            if (skipTags.indexOf(element.tagName.toLowerCase()) === -1) {
-                for (var j = element.childNodes.length - 1; j >= 0; j--) {
-                    var node = element.childNodes[j];
-                    if (node.nodeType === 3) {
-                        if (regularExpression.test(node.nodeValue)) {
-
-                            if (typeof callback == "function") {
-                                callback(node, regularExpression)
-                            } else {
-                                console.error("Not a callback function.")
-                            }
-
-                        }
-
-                    }
-                }
-            }
-        }
-    } catch (error) {
-        console.error("Cryptip Error: " + error)
-    }
 }
 
 function marketCapString(value) {
@@ -238,18 +206,16 @@ function createWidget(sym, priceString) {
                 var template = document.createElement('div');
                 
                 template.id = 'template-' + sym.replace(/[\W_]/g, '-').toLowerCase() + (c > 0 ? c : '');
-                console.log(template.id)
+
                 template.style.display = 'none';
                 template.innerHTML = `
                                 <div class="cryptip-container">
                                     <div class="cryptip-row">
                                         <div class="cryptip-image cryptip-col-3"><img class="cryptip-img-responsive" src="https://files.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png"></div>
                                         <div class="cryptip-main cryptip-col-9">
-
                                                 <div class="cryptip-title"><a class="cryptip-link" href="https://coinmarketcap.com/currencies/${coin.id}/?utm_source=cryptip">${coin.name} (${coin.symbol})</a></div>
                                                 <div class="cryptip-price">${priceString}</div>
                                                 <div class="cryptip-btc">${coin.price_btc} BTC</div>
-
                                         </div>
                                     </div>
                                     <div class="cryptip-row">
@@ -279,39 +245,38 @@ function createWidget(sym, priceString) {
     }
 }
 
-function addCryptipToText(node, regularExpression) {
-    try {
-        var text = node.nodeValue;
-        //text might have HTML elements, so we convert them to text html elements
-        text = htmlEntities(text)
-
-        text = text.replace(regularExpression, function (fullText, match) {
-            console.info('Adding cryptip to:' + match, node.parentNode.tagName)
-            let priceString = createPriceString(match);
-            createWidget(match, priceString)
-            return `<cryptip class="cryptip" data-tippy-interactive="true">${match}</cryptip>`;
-        });
-
-        var replacementNode = document.createElement('cryptip-wrapper');
-        replacementNode.innerHTML = text;
-        node.parentNode.replaceChild(replacementNode, node);
-
-
-    } catch (error) {
-        console.error("Cryptip Error: " + error)
-    }
-}
-
-function addTooltip(currency = 'usd', time = '24h', checkNames = true, ignoreCase = true) {
+function addTooltip(currency = 'usd', time = '24h', checkNames = true, ignoreCase = true, logging = false) {
     try {
 
         var coinDictionary = global.coinDictionary;
 
         var regularExpressionCoins = createRegularExpression(coinDictionary, ignoreCase)
 
-        var elements = document.body.getElementsByTagName('*');
 
-        checkPageElementsForCoins(elements, regularExpressionCoins, addCryptipToText)
+
+        findAndReplaceDOMText(document.body, {
+            preset: 'prose',
+            find: regularExpressionCoins,
+            replace: function (portion, match) {
+                if (logging) {
+                    console.info('Adding cryptip to:' + portion.text)
+                }
+
+                let priceString = createPriceString(match[0]);
+                createWidget(match[0], priceString)
+
+                let cryptipWrapper = document.createElement('cryptip')
+                cryptipWrapper.setAttribute("data-tippy-interactive", "true")
+                cryptipWrapper.setAttribute("class", "cryptip")
+                cryptipWrapper.setAttribute("data-coin", match[0])
+                cryptipWrapper.innerText = portion.text;
+
+                return cryptipWrapper;
+            }
+        });
+
+
+        //checkPageElementsForCoins(elements, regularExpressionCoins, addCryptipToText)
 
     } catch (error) {
         console.error("Cryptip Error: " + error)
@@ -346,7 +311,7 @@ async function addTooltipAdvance(element) {
 
 async function cryptip() {
     try {
-
+        
         await checkStorage();
         if (global.coinDictionary) {
             addTooltip();
@@ -354,9 +319,9 @@ async function cryptip() {
 
         const tip = tippy('.cryptip', {
             html: function (element) {
-                var sym = element.innerHTML
-                var template = '#template-' + element.innerHTML.replace(/[\W_]/g, '-').toLowerCase();
-                //console.log(template)
+                var sym = element.dataset.coin;
+                var template = '#template-' + sym.replace(/[\W_]/g, '-').toLowerCase();
+
                 return template
             }
         });
