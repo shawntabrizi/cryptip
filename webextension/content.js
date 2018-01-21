@@ -225,7 +225,7 @@ function createWidget(sym, priceString) {
                                     <div class="cryptip-row">
                                         <div class="cryptip-image cryptip-col-3"><img class="cryptip-img-responsive" src="https://files.coinmarketcap.com/static/img/coins/64x64/${coin.id}.png"></div>
                                         <div class="cryptip-main cryptip-col-9">
-                                                <div class="cryptip-title"><a class="cryptip-link" href="https://coinmarketcap.com/currencies/${coin.id}/?utm_source=cryptip">${coin.name} (${coin.symbol})</a></div>
+                                                <div class="cryptip-title"><a class="cryptip-link" target="_blank" href="https://coinmarketcap.com/currencies/${coin.id}/?utm_source=cryptip">${coin.name} (${coin.symbol})</a></div>
                                                 <div class="cryptip-price">${priceString}</div>
                                                 <div class="cryptip-btc">${coin.price_btc} BTC</div>
                                         </div>

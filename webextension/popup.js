@@ -29,8 +29,6 @@ async function sendMessageToContentScript(message) {
 async function checkSettings() {
     var response = await sendMessageToContentScript("checkSettings")
 
-    document.getElementById("output").innerText = response;
-
     var enabled = response[0]
     var minimal = response[1]
 

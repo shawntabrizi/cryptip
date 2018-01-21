@@ -3,9 +3,28 @@
 <html>
 <head>
     <meta charset="utf-8">
+    <style>
+        .background {
+            width: 200px;
+            background-image: url(./img/background_2.png)
+        }
+
+        .button {
+            background-color: #664466;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
-<body style="width: 200px;">
+<body class="background">
     <h3>Cryptip by Shawn Tabrizi</h3>
     <div>
         <h4>Find a bug? Want to donate?</h4>
@@ -19,8 +38,8 @@
         <option value="minimal">Minimalist</option>
         <option value="widget">Widget</option>
     </select>
-    <h3>Full Options</h3>
-    <button type="button" id="linkToOptions">Full Option Menu</button>
+    <br /><br />
+    <button type="button" class="button" id="linkToOptions">Full Options Menu</button>
     <script src=".\js\browser-polyfill.min.js"></script>
     <script src="popup.js"></script>
     <div id="output"></div>

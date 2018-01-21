@@ -1,22 +1,31 @@
 function saveOptions(e) {
+
+    var minimal = false;
+
+    if (document.querySelector("#tipStyle").value == 'minimal') {
+        minimal = true;
+    }
+
     var storageItem = browser.storage.local.set({
         'top': document.querySelector("#top").value,
         'currency': document.querySelector("#currency").value,
         'period': document.querySelector("#period").value,
         'ignoreCase': document.querySelector("#ignoreCase").checked,
         'checkNames': document.querySelector("#checkNames").checked,
-        'time': null
+        'time': null,
+        'minimal': minimal
     });
 
     e.preventDefault();
 }
 
 function setCurrentChoice(settings) {
-    document.querySelector("#top").value = settings.top || '100';
+    document.querySelector("#top").value = settings.top || '0';
     document.querySelector("#currency").value = settings.currency || 'usd';
     document.querySelector("#period").value = settings.period || '24h';
-    document.querySelector("#ignoreCase").checked = settings.ignoreCase || false;
-    document.querySelector("#checkNames").checked = settings.checkNames || false;
+    document.querySelector("#ignoreCase").checked = settings.ignoreCase || true;
+    document.querySelector("#checkNames").checked = settings.checkNames || true;
+    document.querySelector("#tipStyle").value = (settings.minimal ? 'minimal' : 'widget');
 }
 
 function onError(error) {

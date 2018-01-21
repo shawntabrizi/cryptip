@@ -9,22 +9,23 @@
     <h3>Find bugs? Have suggestions? Wanna say thanks?</h3>
     <div>
         <p>I am always looking for feedback, and would be happy to hear about any comments or criticisms. Feel free to open bugs on <a href="https://github.com/shawntabrizi/cryptip">GitHub</a> or send me an <a href="mailto:shawntabrizi@gmail.com?Subject=Cryptip%20Feedback">email.</a></p>
-        <p>If you found this plugin extra useful, feel free to say thanks by sending a small donation here:</p>
-        <ul>
-            <li>ETH: <a href="https://etherscan.io/address/0xD62835Fe2B40C8411A10E7980a290270e6A23cDA"><code>0xD62835Fe2B40C8411A10E7980a290270e6A23cDA</code></a></li>
-            <li>BTC: <a href="https://blockchain.info/address/3QQJLmgMJdWDThvWpbvmrKH9WVJyBM9TZy"><code>3QQJLmgMJdWDThvWpbvmrKH9WVJyBM9TZy</code></a></li>
-        </ul>
+        <p>If you found this plugin extra useful, feel free to say thanks by <a href="http://shawntabrizi.com/donate/">sending a small donation</a>.
     </div>
-    <h3>Cryptip Options</h3>
+    <h3>Cryptip Style Options</h3>
+    <select id="tipStyle">
+        <option value="minimal">Minimalist</option>
+        <option value="widget">Widget</option>
+    </select>
+    <h3>Cryptip Matching Options</h3>
     <form>
         <label>Token list:</label>
         <select id="top">
             <option value="10">Top 10</option>
             <option value="50">Top 50</option>
-            <option value="100" selected>Top 100</option>
+            <option value="100">Top 100</option>
             <option value="500">Top 500</option>
             <option value="1000">Top 1000</option>
-            <option value="0">All Tokens</option>
+            <option value="0" selected>All Tokens</option>
         </select>
         <br /><br />
         <label>Currency shown:</label>
@@ -71,9 +72,9 @@
             <option value="7d">7 Days</option>
         </select>
         <br /><br />
-        <input type="checkbox" id="ignoreCase" />Ignore case on cryptocurrency symbol ('BTC', 'btc', 'bTc', etc... will all show price)
+        <input type="checkbox" id="ignoreCase" checked/>Ignore case on cryptocurrency symbol ('BTC', 'btc', 'bTc', etc... will all show price)
         <br /><br />
-        <input type="checkbox" id="checkNames" />Add to cryptocurrency names too ('Ethereum', 'bitCOIN', 'LITECOIN', etc... will all show price)
+        <input type="checkbox" id="checkNames" checked/>Add to cryptocurrency names too ('Ethereum', 'bitCOIN', 'LITECOIN', etc... will all show price)
         <br /><br />
         <button type="submit">Save</button><button type="reset">Reset</button>
 
