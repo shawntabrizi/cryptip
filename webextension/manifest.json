@@ -10,11 +10,12 @@
   "version": "1.1",
   "permissions": [
     "storage",
+    "activeTab",
     "https://api.coinmarketcap.com/"
   ],
   "browser_action": {
     "default_icon": "icons/icon_48.png",
-    "default_popup": "options.html"
+    "default_popup": "popup.html"
   },
   "content_scripts": [
     {

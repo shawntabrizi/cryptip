@@ -77,6 +77,17 @@ async function checkStorage() {
         //Get whatever is in the local storage
         var storage = await browser.storage.local.get();
 
+        //check blacklist
+        if (storage.blacklist) {
+            global.blacklist = JSON.parse(storage.blacklist)
+        }
+
+        if (storage.minimal) {
+            global.minimal = JSON.parse(storage.minimal)
+        } else {
+            global.minimal = false;
+        }
+
         //check time
         if (storage.time) {
             let currentTime = (new Date()).getTime();
@@ -204,7 +215,8 @@ function createWidget(sym, priceString) {
             for (c in coins) {
                 var coin = coins[c]
                 var template = document.createElement('div');
-                
+
+                //template support for same symbol
                 template.id = 'template-' + sym.replace(/[\W_]/g, '-').toLowerCase() + (c > 0 ? c : '');
 
                 template.style.display = 'none';
@@ -245,6 +257,32 @@ function createWidget(sym, priceString) {
     }
 }
 
+function createTip(sym, priceString) {
+    try {
+        if (!(document.getElementById('template-' + sym.replace(/[\W_]/g, '-').toLowerCase()))) {
+            sym = sym.toUpperCase();
+            var coins = global.coinDictionary[sym]
+
+            for (c in coins) {
+                var coin = coins[c]
+                var template = document.createElement('div');
+
+                //template support for same symbol
+                template.id = 'template-' + sym.replace(/[\W_]/g, '-').toLowerCase() + (c > 0 ? c : '');
+
+                template.style.display = 'none';
+                template.innerHTML = priceString
+                document.body.appendChild(template);
+            }
+        } else {
+            //console.log("Already made a cryptip for this: " + sym)
+        }
+
+    } catch (error) {
+        console.error("Cryptip Error: " + error)
+    }
+}
+
 function addTooltip(currency = 'usd', time = '24h', checkNames = true, ignoreCase = true, logging = false) {
     try {
 
@@ -263,7 +301,12 @@ function addTooltip(currency = 'usd', time = '24h', checkNames = true, ignoreCas
                 }
 
                 let priceString = createPriceString(match[0]);
-                createWidget(match[0], priceString)
+
+                if (global.minimal == true) {
+                    createTip(match[0], priceString)
+                } else {
+                    createWidget(match[0], priceString)
+                }
 
                 let cryptipWrapper = document.createElement('cryptip')
                 cryptipWrapper.setAttribute("data-tippy-interactive", "true")
@@ -309,22 +352,91 @@ async function addTooltipAdvance(element) {
 
 }
 
+//send settings to popup
+function checkSettings() {
+
+    var enabled = true;
+    var minimal = false;
+
+
+    if (global.blacklist) {
+        var site = window.location.hostname
+        if (global.blacklist.includes(site)) {
+            enabled = false;
+        }
+    }
+
+    if (global.minimal) {
+        minimal = global.minimal
+    }
+
+    return [enabled, minimal]
+}
+
+async function addToBlacklist() {
+
+    if (!global.blacklist) {
+        global.blacklist = []
+    }
+
+    var site = window.location.hostname
+
+    if (!(global.blacklist.includes(site))) {
+        global.blacklist.push(site)
+
+        disableTippy();
+
+        return await browser.storage.local.set({
+            'blacklist': JSON.stringify(global.blacklist),
+        });
+    }
+}
+
+async function removeFromBlacklist() {
+    if (global.blacklist) {
+
+        var site = window.location.hostname
+
+        if (global.blacklist.includes(site)) {
+            var index = global.blacklist.indexOf(site);
+            global.blacklist.splice(index, 1);
+
+            var result = await browser.storage.local.set({
+                'blacklist': JSON.stringify(global.blacklist),
+            });
+
+            await cryptip();
+
+            return result
+        }
+    }
+}
+
 async function cryptip() {
     try {
-        
+
         await checkStorage();
-        if (global.coinDictionary) {
-            addTooltip();
-        }
 
-        const tip = tippy('.cryptip', {
-            html: function (element) {
-                var sym = element.dataset.coin;
-                var template = '#template-' + sym.replace(/[\W_]/g, '-').toLowerCase();
+        var settings = checkSettings();
 
-                return template
+        var enabled = settings[0];
+
+        if (enabled) {
+
+            if (global.coinDictionary) {
+                addTooltip();
             }
-        });
+
+            const tip = tippy('.cryptip', {
+                theme: 'dark',
+                html: function (element) {
+                    var sym = element.dataset.coin;
+                    var template = '#template-' + sym.replace(/[\W_]/g, '-').toLowerCase();
+
+                    return template
+                }
+            });
+        }
 
 
     } catch (error) {
@@ -351,9 +463,65 @@ async function cryptipEmbedded() {
     }
 }
 
+function disableTippy() {
+
+    [].forEach.call(document.querySelectorAll('.cryptip'), function (tip) {
+        console.log("Destroying")
+        if (tip.tippy) {
+            tip.tippy.destroy();
+        }
+    });
+
+}
+
+async function setStyle(minimal = false) {
+
+    global.minimal = minimal;
+    console.log("Minimal?" + minimal)
+    var result = await browser.storage.local.set({
+        'minimal': JSON.stringify(global.minimal),
+    });
+
+    disableTippy();
+    cryptip();
+
+}
+
 if (this.browser) {
     cryptip();
 } else {
     console.log('Cryptip: Detected embedded plugin.')
     cryptipEmbedded();
 }
+
+browser.runtime.onMessage.addListener(request => {
+    console.log("Message from the background script:");
+    console.log(request.message);
+
+    if (request.message == 'addToBlacklist') {
+        addToBlacklist();
+        return Promise.resolve({ response: "Site Added to Blacklist" })
+    }
+
+    if (request.message == 'removeFromBlacklist') {
+        removeFromBlacklist();
+        return Promise.resolve({ response: "Site Added to Whitelist" })
+    }
+
+    if (request.message == 'checkSettings') {
+        var result = checkSettings();
+        return Promise.resolve({ response: result })
+    }
+
+    if (request.message == 'setWidget') {
+        var result = setStyle(false);
+        return Promise.resolve({ response: "Style set to Widget. Refresh the page." })
+    }
+
+    if (request.message == 'setMinimal') {
+        var result = setStyle(true);
+        return Promise.resolve({ response: "Style set to Minimal. Refresh the page." })
+    }
+
+    return Promise.resolve({ response: "Didn't perform any action" });
+});

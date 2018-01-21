@@ -10,7 +10,7 @@
 
 [class*="cryptip-col-"] {
     float: left;
-    padding: 15px;
+    padding: 10px;
 }
 
 .cryptip-col-1 {
@@ -67,26 +67,19 @@
 }
 
 .cryptip-title {
-    font-size:16px;
-
+    font-size: 16px;
 }
 
 .cryptip-img-responsive {
     vertical-align: middle;
 }
 
-a.cryptip-link:link,
-a.cryptip-link:visited {
-    color:#ffffff;
-}
-
-
 .cryptip-price {
     font-size: 14px;
 }
 
 .cryptip-btc {
-    color:#808080;
+    color: #808080;
     font-size: 12px;
 }
 
@@ -99,5 +92,39 @@ a.cryptip-link:visited {
 }
 
 .cryptip-footer {
-    font-size: 6px;
+    font-size: 10px;
 }
+
+.tippy-tooltip.light-theme {
+    background-color: #F5F5F5;
+}
+
+    .tippy-tooltip.light-theme .tippy-content {
+        color: black;
+    }
+
+    .tippy-tooltip.light-theme .tippy-backdrop {
+        background-color: #F5F5F5;
+    }
+
+    .tippy-tooltip.light-theme a.cryptip-link:link,
+    .tippy-tooltip.light-theme a.cryptip-link:visited {
+        color: black;
+    }
+
+.tippy-tooltip.dark-theme {
+    background-color: #282828;
+}
+
+    .tippy-tooltip.dark-theme .tippy-content {
+        color: white;
+    }
+
+    .tippy-tooltip.dark-theme .tippy-backdrop {
+        background-color: #282828;
+    }
+
+    .tippy-tooltip.dark-theme a.cryptip-link:link,
+    .tippy-tooltip.dark-theme a.cryptip-link:visited {
+        color: white;
+    }
