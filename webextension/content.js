@@ -487,6 +487,25 @@ async function cryptip() {
     }
 }
 
+async function cryptipEmbedded() {
+    var coinMarketCapData = await getPrice();
+    global.coinDictionary = createCoinDictionary(coinMarketCapData);
+    addTooltip();
+    // for each element with cryptip
+    const tip = tippy('.cryptip', {
+        theme: global.settings.theme,
+        html: function (element) {
+            //find what coin it represents
+            var sym = element.dataset.coin;
+
+            //get the cryptip for that coin
+            var template = '#template-' + sym.replace(/[\W_]/g, '-').toLowerCase();
+
+            return template
+        }
+    });
+}
+
 function disableTippy() {
 
     var tips = document.querySelectorAll('.cryptip');
@@ -520,46 +539,48 @@ async function setTheme(theme = 'dark') {
 
 if (this.browser) {
     cryptip();
+
+    browser.runtime.onMessage.addListener(request => {
+
+        if (request.message == 'addToBlacklist') {
+            addToBlacklist();
+            return Promise.resolve({ response: "Site Added to Blacklist" })
+        }
+
+        if (request.message == 'removeFromBlacklist') {
+            removeFromBlacklist();
+            return Promise.resolve({ response: "Site Added to Whitelist" })
+        }
+
+        if (request.message == 'checkSettings') {
+            var result = checkSettings();
+            return Promise.resolve({ response: JSON.stringify(result) })
+        }
+
+        if (request.message == 'setWidget') {
+            var result = setStyle('widget');
+            return Promise.resolve({ response: "Style set to Widget. Refresh the page." })
+        }
+
+        if (request.message == 'setMinimal') {
+            var result = setStyle('minimal');
+            return Promise.resolve({ response: "Style set to Minimal. Refresh the page." })
+        }
+
+        if (request.message == 'setDark') {
+            var result = setTheme('dark');
+            return Promise.resolve({ response: "Theme set to Dark. Refresh the page." })
+        }
+
+        if (request.message == 'setLight') {
+            var result = setTheme('light');
+            return Promise.resolve({ response: "Theme set to Light. Refresh the page." })
+        }
+
+        return Promise.resolve({ response: "Didn't perform any action" });
+    });
 } else {
     console.log('Cryptip: Detected embedded plugin.')
+    cryptipEmbedded();
 }
 
-browser.runtime.onMessage.addListener(request => {
-
-    if (request.message == 'addToBlacklist') {
-        addToBlacklist();
-        return Promise.resolve({ response: "Site Added to Blacklist" })
-    }
-
-    if (request.message == 'removeFromBlacklist') {
-        removeFromBlacklist();
-        return Promise.resolve({ response: "Site Added to Whitelist" })
-    }
-
-    if (request.message == 'checkSettings') {
-        var result = checkSettings();
-        return Promise.resolve({ response: JSON.stringify(result) })
-    }
-
-    if (request.message == 'setWidget') {
-        var result = setStyle('widget');
-        return Promise.resolve({ response: "Style set to Widget. Refresh the page." })
-    }
-
-    if (request.message == 'setMinimal') {
-        var result = setStyle('minimal');
-        return Promise.resolve({ response: "Style set to Minimal. Refresh the page." })
-    }
-
-    if (request.message == 'setDark') {
-        var result = setTheme('dark');
-        return Promise.resolve({ response: "Theme set to Dark. Refresh the page." })
-    }
-
-    if (request.message == 'setLight') {
-        var result = setTheme('light');
-        return Promise.resolve({ response: "Theme set to Light. Refresh the page." })
-    }
-
-    return Promise.resolve({ response: "Didn't perform any action" });
-});
