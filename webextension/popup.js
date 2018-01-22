@@ -1,20 +1,17 @@
+//Open the full options menu
 function openOptions() {
     browser.runtime.openOptionsPage();
 }
 
-function notifyExtension(e) {
-    if (e.target.tagName != "A") {
-        return;
-    }
-    browser.runtime.sendMessage({ "url": e.target.href });
-}
-
+//Send a message from Popup to Content Script
 async function sendMessageToContentScript(message) {
 
+    //get active tabs
     var activeTabs = await browser.tabs.query({
         currentWindow: true,
         active: true
     });
+
 
     for (let tab of activeTabs) {
         var response = await browser.tabs.sendMessage(
@@ -26,26 +23,27 @@ async function sendMessageToContentScript(message) {
     }
 }
 
+//get the settings from Content.js
 async function checkSettings() {
-    var response = await sendMessageToContentScript("checkSettings")
+    var settings = JSON.parse(await sendMessageToContentScript("checkSettings"))
 
-    var enabled = response[0]
-    var minimal = response[1]
 
-    document.getElementById("enabled").checked = enabled
+    document.getElementById("enabled").checked = settings.enabled
 
-    if (minimal) {
-        document.getElementById("tipStyle").value = "minimal";
-    } else {
-        document.getElementById("tipStyle").value = "widget";
-    }
+    document.getElementById("tipStyle").value = settings.style
+
+    document.getElementById("tipTheme").value = settings.theme
+
 }
 
+//Button opens up the full options menu
 document.querySelector("#linkToOptions").addEventListener("click", openOptions)
 
+//When popup opens check settings
 checkSettings();
 
 
+// Listen for the user enabling/disabling cryptip
 document.getElementById("enabled").addEventListener("change", async function () {
     if (this.checked) {
 
@@ -60,16 +58,32 @@ document.getElementById("enabled").addEventListener("change", async function () 
     }
 });
 
+
+//Listen for the user changing the tip style
 document.getElementById("tipStyle").addEventListener("change", async function () {
     if (this.value == "minimal") {
         var response = await sendMessageToContentScript("setMinimal")
         document.getElementById("output").innerText = response;
-    } else {
+    } else if (this.value == "widget") {
         var response = await sendMessageToContentScript("setWidget")
+        document.getElementById("output").innerText = response;
+    } else {
+        document.getElementById("output").innerText = "Huh?";
+    }
+});
+
+//Listen for the user changing the tip style
+document.getElementById("tipTheme").addEventListener("change", async function () {
+    if (this.value == "dark") {
+        var response = await sendMessageToContentScript("setDark")
+        document.getElementById("output").innerText = response;
+    } else {
+        var response = await sendMessageToContentScript("setLight")
         document.getElementById("output").innerText = response;
     }
 });
 
+//Make links in tooltip clickable, and open in a new tab
 document.addEventListener('DOMContentLoaded', function () {
     var links = document.getElementsByTagName("a");
     for (var i = 0; i < links.length; i++) {

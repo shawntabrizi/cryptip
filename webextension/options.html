@@ -7,14 +7,15 @@
 
 <body>
     <h3>Find bugs? Have suggestions? Wanna say thanks?</h3>
-    <div>
-        <p>I am always looking for feedback, and would be happy to hear about any comments or criticisms. Feel free to open bugs on <a href="https://github.com/shawntabrizi/cryptip">GitHub</a> or send me an <a href="mailto:shawntabrizi@gmail.com?Subject=Cryptip%20Feedback">email.</a></p>
-        <p>If you found this plugin extra useful, feel free to say thanks by <a href="http://shawntabrizi.com/donate/">sending a small donation</a>.
-    </div>
+    <p>Contact me on <a href="https://github.com/shawntabrizi/cryptip">GitHub</a> or by <a href="mailto:shawntabrizi@gmail.com?Subject=Cryptip%20Feedback">e-mail</a>! Learn how to donate <a href="http://shawntabrizi.com/donate/">here</a>!</p>
     <h3>Cryptip Style Options</h3>
     <select id="tipStyle">
         <option value="minimal">Minimalist</option>
-        <option value="widget">Widget</option>
+        <option value="widget" selected>Widget</option>
+    </select>
+    <select id="tipTheme">
+        <option value="light">Light Theme</option>
+        <option value="dark" selected>Dark Theme</option>
     </select>
     <h3>Cryptip Matching Options</h3>
     <form>
@@ -75,6 +76,8 @@
         <input type="checkbox" id="ignoreCase" checked/>Ignore case on cryptocurrency symbol ('BTC', 'btc', 'bTc', etc... will all show price)
         <br /><br />
         <input type="checkbox" id="checkNames" checked/>Add to cryptocurrency names too ('Ethereum', 'bitCOIN', 'LITECOIN', etc... will all show price)
+        <h3>Cryptip Blacklist</h3>
+        <p id="blacklist" style="max-width: 400px; overflow-x:scroll;">None</p>
         <br /><br />
         <button type="submit">Save</button><button type="reset">Reset</button>
 
