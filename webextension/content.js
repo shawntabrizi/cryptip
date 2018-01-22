@@ -29,8 +29,6 @@ async function getPrice() {
         let response = await fetch("https://api.coinmarketcap.com/v1/ticker/?limit=" + top + "&convert=" + currency);
         let data = await response.json();
 
-        console.log(data)
-
         return data;
     } catch (error) {
         console.error("Cryptip Error: " + error);
@@ -121,8 +119,6 @@ async function checkStorage() {
             global.blacklist = JSON.parse(storage.blacklist);
             global.enabled = checkBlacklist();
 
-            console.log("Enabled?" + global.enabled)
-
             //if not enabled, no need to do anything more
             if (!global.enabled) {
                 return null;
@@ -152,7 +148,7 @@ async function checkStorage() {
             }
         //if no time information, get data for the first time
         } else {
-            console.log('Getting price data for the first time.');
+            console.log('Cryptip: Getting price data for the first time.');
             await storePrice();
         }
 
@@ -529,8 +525,6 @@ if (this.browser) {
 }
 
 browser.runtime.onMessage.addListener(request => {
-    console.log("Message from the background script:");
-    console.log(request.message);
 
     if (request.message == 'addToBlacklist') {
         addToBlacklist();
