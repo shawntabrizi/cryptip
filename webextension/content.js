@@ -12,7 +12,7 @@ var global = {
         //also ignore case
         'ignoreCase': true,
         //minimal mode or widget mode
-        'style': 'widget',
+        'style': 'minimal',
         //theme dark or light
         'theme': 'dark',
         //logging prints in console which matches are detected
